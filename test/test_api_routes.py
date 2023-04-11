@@ -3,15 +3,15 @@ from api_client import APIClient
 
 
 class TestRoutes:
-    username = "admin@zeitmedical.com"
-    password =  "oG9!YvYSho2VC!"
+    username = "TODO"
+    password =  "TODO"
     def test_login_routes_password(self):
         client = APIClient()
         client.login(self.username, self.password)
         client.logout()
 
     def test_login_routes_token(self):
-        client = APIClient(token="c4c12c4e-c786-49db-913d-89df9918bebc")
+        client = APIClient(token="TODO")
         client.get_loops()
 
 
