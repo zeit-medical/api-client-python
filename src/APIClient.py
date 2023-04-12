@@ -82,10 +82,7 @@ class APIClient(BaseAPIClient, metaclass=Singleton):
             )
 
         elif token:
-            self.requests_session.headers.update(
-                {"authorization": str(self.token)}
-            )
-
+            self.requests_session.headers.update({"authorization": str(self.token)})
 
         else:
             raise APIError(
@@ -176,7 +173,7 @@ class APIClient(BaseAPIClient, metaclass=Singleton):
         )
         return self._get(f"{self.base_url}/loops", params=params)
 
-    def get_loop_me(self):
+    def get_loops_me(self):
         return self._get(f"{self.base_url}/loops/me")
 
     def get_package(self, id: str = ""):
