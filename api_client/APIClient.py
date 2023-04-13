@@ -124,15 +124,9 @@ class APIClient(BaseAPIClient, metaclass=Singleton):
                 "loop_id": loop_id,
                 "limit": limit,
                 "offset": offset,
+                "email": email,
             }
         )
-        if email:
-            users = self.get_users(limit=999)
-            return next(
-                item
-                for item in [u if u["email"] == email else None for u in users["items"]]
-                if item is not None
-            )
 
         return self._get(f"{self.base_url}/users", params=params)
 
