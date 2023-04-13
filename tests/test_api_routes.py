@@ -1,6 +1,6 @@
 import os
 from uuid import uuid4
-from api_client import APIClient
+from zeitclient import APIClient
 
 
 class TestRoutes:
