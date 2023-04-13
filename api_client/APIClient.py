@@ -114,7 +114,7 @@ class APIClient(BaseAPIClient, metaclass=Singleton):
 
     def get_users(
         self,
-        email: str = "",
+        email: str | None = None,
         loop_id: PydanticObjectId | None = None,
         limit: int = 100,
         offset: int = 0,
@@ -127,7 +127,6 @@ class APIClient(BaseAPIClient, metaclass=Singleton):
                 "email": email,
             }
         )
-
         return self._get(f"{self.base_url}/users", params=params)
 
     def patch_user(self, id: PydanticObjectId, body: Dict[str, Any]):
