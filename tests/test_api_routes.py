@@ -1,6 +1,6 @@
 import os
 from uuid import uuid4
-from src import APIClient
+from api_client import APIClient
 
 
 class TestRoutes:

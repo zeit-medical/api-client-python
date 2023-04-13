@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "zeit-api-client"
+name = "api-client"
 version = "0.1.0"
 description = ""
 authors = ["Gerrit Egnew <gerrit.egnew@zeitmedical.com>"]
