@@ -1,10 +1,13 @@
 from __future__ import annotations
+import signal
+import asyncio
 from getpass import getpass
 import os
 from typing import Any, Dict, Optional
 from pydantic import BaseModel
 
 from .schemas.pydanticobjectid import PydanticObjectId
+from websockets.client import connect
 
 from .APIError import APIError
 from .BaseAPIClient import BaseAPIClient
@@ -197,3 +200,33 @@ class APIClient(BaseAPIClient, metaclass=Singleton):
 
     def get_sessions(self, loop_id: PydanticObjectId):
         return self._get(f"{self.base_url}/loops/{loop_id}/sessions")
+
+    async def listen_status(self, loop_id: PydanticObjectId, process_fn=print):
+        uri = f"wss://{self.base_url.lstrip('https://')}/loops/{loop_id}/status?token={self.token}"
+        async with connect(uri) as ws:
+            # Close the connection when receiving SIGTERM, SIGINT
+            loop = asyncio.get_running_loop()
+            loop.add_signal_handler(signal.SIGTERM, loop.create_task, ws.close())
+            loop.add_signal_handler(signal.SIGINT, loop.create_task, ws.close())
+
+            # Process messages received on the connection.
+            async for message in ws:
+                process_fn(message)
+
+    async def listen_data(
+        self,
+        loop_id: PydanticObjectId,
+        *,
+        type="eeg",
+        process_fn=print,
+    ):
+        uri = f"wss://{self.base_url.lstrip('https://')}/loops/{loop_id}/data?type={type}&token={self.token}"
+        async with connect(uri) as ws:
+            # Close the connection when receiving SIGTERM, SIGINT
+            loop = asyncio.get_running_loop()
+            loop.add_signal_handler(signal.SIGTERM, loop.create_task, ws.close())
+            loop.add_signal_handler(signal.SIGINT, loop.create_task, ws.close())
+
+            # Process messages received on the connection.
+            async for message in ws:
+                process_fn(message)
