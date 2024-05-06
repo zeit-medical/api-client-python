@@ -5,7 +5,7 @@ from pydantic.dataclasses import dataclass
 class APIError(BaseException):
     url: str
     status_code: int
-    message: str
+    message: str | dict
 
     def __str__(self):
         if self.status_code:

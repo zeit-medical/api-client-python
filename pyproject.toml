@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "api-client"
-version = "0.2.0"
+version = "0.2.5"
 description = ""
 authors = ["Gerrit Egnew <gerrit.egnew@zeitmedical.com>"]
 readme = "README.md"

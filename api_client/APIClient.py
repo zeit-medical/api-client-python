@@ -5,6 +5,8 @@ from typing import Any
 import httpx
 from websockets.client import connect
 
+from api_client.APIError import APIError
+
 from .schemas.pydanticobjectid import PydanticObjectId
 
 
@@ -26,11 +28,139 @@ class APIClient:
         if username and password:
             self.auth(username, password)
 
+    def _parse_response(self, response: httpx.Response, raw: bool = False) -> Any:
+        success = 200 <= response.status_code < 300
+
+        if success and raw:
+            return response.content
+
+        try:
+            response_json = response.json()
+
+            if success:
+                return response_json
+            else:
+                raise APIError(
+                    response.url.__str__(), response.status_code, response_json
+                )
+        except Exception as error:
+            raise APIError(response.url.__str__(), response.status_code, repr(error))
+
+    def get(
+        self,
+        url,
+        *,
+        params=None,
+        headers=None,
+        cookies=None,
+        **kwargs,
+    ):
+        res = self.client.get(
+            url, params=params, headers=headers, cookies=cookies, **kwargs
+        )
+        return self._parse_response(res)
+
+    def post(
+        self,
+        url,
+        *,
+        content=None,
+        data=None,
+        files=None,
+        json=None,
+        params=None,
+        headers=None,
+        cookies=None,
+        **kwargs,
+    ):
+        res = self.client.post(
+            url,
+            content=content,
+            data=data,
+            files=files,
+            json=json,
+            params=params,
+            headers=headers,
+            cookies=cookies,
+            **kwargs,
+        )
+        return self._parse_response(res)
+
+    def put(
+        self,
+        url,
+        *,
+        content=None,
+        data=None,
+        files=None,
+        json=None,
+        params=None,
+        headers=None,
+        cookies=None,
+        **kwargs,
+    ):
+        res = self.client.put(
+            url,
+            content=content,
+            data=data,
+            files=files,
+            json=json,
+            params=params,
+            headers=headers,
+            cookies=cookies,
+            **kwargs,
+        )
+        return self._parse_response(res)
+
+    def patch(
+        self,
+        url,
+        *,
+        content=None,
+        data=None,
+        files=None,
+        json=None,
+        params=None,
+        headers=None,
+        cookies=None,
+        **kwargs,
+    ):
+        res = self.client.patch(
+            url,
+            content=content,
+            data=data,
+            files=files,
+            json=json,
+            params=params,
+            headers=headers,
+            cookies=cookies,
+            **kwargs,
+        )
+        return self._parse_response(res)
+
+    def delete(
+        self,
+        url,
+        *,
+        params=None,
+        headers=None,
+        cookies=None,
+        **kwargs,
+    ):
+        res = self.client.delete(
+            url,
+            params=params,
+            headers=headers,
+            cookies=cookies,
+            **kwargs,
+        )
+        return self._parse_response(res)
+
     def login(self, username: str, password: str):
         return self.auth(username, password)
 
     def logout(self):
-        return self.client.post("/auth/logout")
+        return self.post("/auth/logout")
 
     def auth(self, username: str, password: str):
         if self.access_token:
@@ -50,23 +180,19 @@ class APIClient:
             return False
 
     def get_me(self):
-        res = self.client.get("/users/me")
-        if res.status_code == 200:
-            return res.json()
-        else:
-            raise RuntimeError(f"Invalid status code {res.status_code}")
+        return self.get("/users/me")
 
     def register_user(self, body):
-        return self.client.post("/auth/register", json=body)
+        return self.post("/auth/register", json=body)
 
     def request_verify_token(self, email: str):
-        return self.client.post("/auth/request-verify-token", json={"email": email})
+        return self.post("/auth/request-verify-token", json={"email": email})
 
     def get_user(self, id: PydanticObjectId):
-        return self.client.get(f"/users/{id}")
+        return self.get(f"/users/{id}")
 
     def get_user_loops(self, id: PydanticObjectId):
-        return self.client.get(f"users/{id}/loops")
+        return self.get(f"users/{id}/loops")
 
     def get_users(
         self,
@@ -82,29 +208,26 @@ class APIClient:
             "email": email,
         }
         params = {k: v for k, v in _params.items() if v}
-        res = self.client.get("/users", params=params)
-
-        if res.status_code != 200:
-            raise RuntimeError(f"Invalid status code {res.status_code}")
-        return res.json()["items"]
+        res = self.get("/users", params=params)
+        return res
 
     def patch_user(self, id: PydanticObjectId, body: dict[str, Any]):
-        return self.client.patch(f"/users/{id}", json=body)
+        return self.patch(f"/users/{id}", json=body)
 
     def delete_user(self, id: str):
-        return self.client.delete(f"/users/{id}")
+        return self.delete(f"/users/{id}")
 
     def create_loop(self, body: dict[str, Any]):
-        return self.client.post("/loops", json=body)
+        return self.post("/loops", json=body)
 
     def patch_loop(self, id: PydanticObjectId, body: dict[str, Any]):
-        return self.client.patch(f"/loops/{id}", json=body)
+        return self.patch(f"/loops/{id}", json=body)
 
     def delete_loop(self, id: PydanticObjectId):
-        return self.client.delete(f"/loops/{id}")
+        return self.delete(f"/loops/{id}")
 
     def get_loop(self, id: PydanticObjectId):
-        return self.client.get(f"/loops/{id}")
+        return self.get(f"/loops/{id}")
 
     def get_loops(
         self,
@@ -122,16 +245,14 @@ class APIClient:
             "offset": offset,
         }
         params = {k: v for k, v in _params.items() if v}
-        res = self.client.get("/loops", params=params)
-        if res.status_code != 200:
-            raise RuntimeError(f"Invalid status code {res.status_code}")
-        return res.json()["items"]
+        res = self.get("/loops", params=params)
+        return res
 
     def get_loops_me(self):
-        return self.client.get("/loops/me")
+        return self.get("/loops/me")
 
     def get_package(self, id: str):
-        return self.client.get(f"/packages/{id}")
+        return self.get(f"/packages/{id}")
 
     def get_packages(
         self,
@@ -147,16 +268,16 @@ class APIClient:
             "offset": offset,
         }
         params = {k: v for k, v in _params.items() if v}
-        return self.client.get("/packages", params=params)
+        return self.get("/packages", params=params)
 
     def create_package(self, body: dict[str, Any]):
-        return self.client.post("/packages", json=body)
+        return self.post("/packages", json=body)
 
     def delete_package(self, id: PydanticObjectId):
-        return self.client.delete(f"/packages/{id}")
+        return self.delete(f"/packages/{id}")
 
     def get_sessions(self, loop_id: PydanticObjectId):
-        return self.client.get(f"/loops/{loop_id}/sessions")
+        return self.get(f"/loops/{loop_id}/sessions")
 
     async def listen_status(self, loop_id: PydanticObjectId, process_fn=print):
         uri = f"wss://{str(self.client.base_url).lstrip('https://')}/loops/{loop_id}/status?token={self.access_token}"
