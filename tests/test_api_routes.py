@@ -78,10 +78,3 @@ class TestRoutes:
 
     def test_register_user(self, client, test_user):
         pass
-
-    def test_test(self, client):
-        res = client.post(
-            f"/ml/baseline/636c1b297401758c0b546532",
-            data={"start": "2024-04-24T13:45:07", "end": "2024-04-24 13:45:43"},
-        )
-        __import__('pdb').set_trace()

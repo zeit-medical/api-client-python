@@ -4,6 +4,7 @@ import signal
 from typing import Any
 import httpx
 from websockets.client import connect
+from json import JSONDecodeError
 
 from api_client.APIError import APIError
 
@@ -43,6 +44,8 @@ class APIClient:
                 raise APIError(
                     response.url.__str__(), response.status_code, response_json
                 )
+        except JSONDecodeError:
+            return response.content
         except Exception as error:
             raise APIError(response.url.__str__(), response.status_code, repr(error))
 
