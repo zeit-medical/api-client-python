@@ -5,6 +5,7 @@ from typing import Any
 import httpx
 from websockets.client import connect
 from json import JSONDecodeError
+from datetime import datetime
 
 from api_client.APIError import APIError
 
@@ -281,6 +282,9 @@ class APIClient:
 
     def get_sessions(self, loop_id: PydanticObjectId):
         return self.get(f"/loops/{loop_id}/sessions")
+
+    def set_baseline(self, loop_id: PydanticObjectId, start: datetime, end: datetime):
+        return self.post(f"/ml/baseline/{loop_id}", json={"start": start, "stop": end})
 
     async def listen_status(self, loop_id: PydanticObjectId, process_fn=print):
         uri = f"wss://{str(self.client.base_url).lstrip('https://')}/loops/{loop_id}/status?token={self.access_token}"
